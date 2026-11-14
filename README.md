@@ -15,4 +15,3 @@ En este examen hice dos módulos para Odoo. Dejé todo en la carpeta `examen_fin
 
 Acá dejé las capturas de lo que fui haciendo, las respuestas de cada parte y la explicación del módulo de préstamos.
 
-[Ver la justificación](Justificacion.pdf).
