@@ -1,4 +1,7 @@
-from odoo import fields, models
+import re
+
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 TIPOS_CLIENTE = [
@@ -17,3 +20,13 @@ class ResPartner(models.Model):
     )
     numero_cuenta = fields.Char(string="Número de cuenta", copy=False)
     carrera = fields.Char(string="Carrera")
+
+    @api.constrains("tipo_cliente", "numero_cuenta")
+    def _check_numero_cuenta(self):
+        for partner in self:
+            if partner.tipo_cliente == "estudiante" and not re.fullmatch(
+                r"[0-9]{10}", partner.numero_cuenta or ""
+            ):
+                raise ValidationError(
+                    "El número de cuenta del estudiante debe tener exactamente 10 dígitos numéricos."
+                )

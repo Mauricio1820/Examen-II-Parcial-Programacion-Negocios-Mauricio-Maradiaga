@@ -2,6 +2,9 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
+LIMITE_UNIDADES_ESTUDIANTE = 10
+
+
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
@@ -18,6 +21,12 @@ class SaleOrder(models.Model):
     )
     convenio_aplicado = fields.Boolean(
         string="Convenio aplicado", readonly=True, copy=False
+    )
+    monto_ahorro = fields.Monetary(
+        string="Ahorro por convenio",
+        compute="_compute_monto_ahorro",
+        store=True,
+        currency_field="currency_id",
     )
 
     @api.depends("partner_id", "partner_id.tipo_cliente", "date_order")
@@ -42,4 +51,30 @@ class SaleOrder(models.Model):
             order.message_post(
                 body=f"Se aplicó el {order.convenio_id.name} "
                      f"con {order.convenio_id.porcentaje:g} % de descuento."
+            )
+
+    def action_confirm(self):
+        for order in self:
+            if order.tipo_cliente == "estudiante":
+                lineas = order.order_line.filtered(lambda line: not line.display_type)
+                total = sum(lineas.mapped("product_uom_qty"))
+                if total > LIMITE_UNIDADES_ESTUDIANTE:
+                    raise UserError(
+                        f"El límite para estudiantes es de {LIMITE_UNIDADES_ESTUDIANTE} unidades. "
+                        f"El pedido tiene {total:g} unidades."
+                    )
+        return super().action_confirm()
+
+    @api.depends(
+        "order_line.price_unit",
+        "order_line.product_uom_qty",
+        "order_line.discount",
+        "order_line.display_type",
+    )
+    def _compute_monto_ahorro(self):
+        for order in self:
+            order.monto_ahorro = sum(
+                line.price_unit * line.product_uom_qty * line.discount / 100
+                for line in order.order_line
+                if not line.display_type
             )
