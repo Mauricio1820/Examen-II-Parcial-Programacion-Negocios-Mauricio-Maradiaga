@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="prestamo_equipo_view_list" model="ir.ui.view">
+        <field name="name">unicah.prestamo.equipo.list</field>
+        <field name="model">unicah.prestamo.equipo</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="estado == 'devuelto'">
+                <field name="nombre_equipo"/>
+                <field name="solicitante_id"/>
+                <field name="fecha_prestamo"/>
+                <field name="fecha_devolucion_prevista"/>
+                <field name="dias_prestamo"/>
+                <field name="fecha_devolucion_real" optional="hide"/>
+                <field name="estado" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="prestamo_equipo_view_form" model="ir.ui.view">
+        <field name="name">unicah.prestamo.equipo.form</field>
+        <field name="model">unicah.prestamo.equipo</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_entregar" string="Entregar equipo" type="object"
+                            class="oe_highlight" invisible="estado != 'borrador'"/>
+                    <button name="action_devolver" string="Registrar devolución" type="object"
+                            class="oe_highlight" invisible="estado != 'prestado'"/>
+                    <field name="estado" widget="statusbar"
+                           statusbar_visible="borrador,prestado,devuelto"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="nombre_equipo"/>
+                        <h1>
+                            <field name="nombre_equipo" placeholder="Ej. Proyector UNICAH-001"
+                                   readonly="estado != 'borrador'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="solicitante_id" readonly="estado != 'borrador'"/>
+                            <field name="fecha_prestamo" readonly="estado != 'borrador'"/>
+                            <field name="observaciones"/>
+                        </group>
+                        <group>
+                            <field name="fecha_devolucion_prevista" readonly="estado == 'devuelto'"/>
+                            <field name="dias_prestamo"/>
+                            <field name="fecha_devolucion_real" invisible="estado != 'devuelto'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="prestamo_equipo_view_search" model="ir.ui.view">
+        <field name="name">unicah.prestamo.equipo.search</field>
+        <field name="model">unicah.prestamo.equipo</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="nombre_equipo"/>
+                <field name="solicitante_id"/>
+                <filter name="prestados" string="En préstamo" domain="[('estado', '=', 'prestado')]"/>
+                <filter name="devueltos" string="Devueltos" domain="[('estado', '=', 'devuelto')]"/>
+                <group>
+                    <filter name="por_solicitante" string="Solicitante" context="{'group_by': 'solicitante_id'}"/>
+                    <filter name="por_estado" string="Estado" context="{'group_by': 'estado'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="prestamo_equipo_action" model="ir.actions.act_window">
+        <field name="name">Préstamos de equipo</field>
+        <field name="res_model">unicah.prestamo.equipo</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="prestamo_equipo_view_search"/>
+    </record>
+
+    <menuitem id="menu_prestamos_unicah_root" name="Préstamos UNICAH"
+              sequence="30" groups="base.group_user"/>
+    <menuitem id="menu_prestamo_equipo" name="Préstamos de equipo"
+              parent="menu_prestamos_unicah_root" action="prestamo_equipo_action" sequence="10"/>
+</odoo>

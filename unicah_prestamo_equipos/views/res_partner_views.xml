@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_form_prestamos_equipo" model="ir.ui.view">
+        <field name="name">res.partner.form.prestamos.equipo</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_ver_prestamos_equipo" type="object"
+                        class="oe_stat_button" icon="fa-laptop" groups="base.group_user">
+                    <field name="prestamo_equipo_count" widget="statinfo" string="Préstamos"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>
